@@ -43,10 +43,13 @@ class budget():
             print(r"You're not in the red. Let's make it even better.")
 
     def updateBudget(self):
-        choice = str(input('Would you like a Safe or Risky budget? '))
+        choice = str(
+            input(
+                'Would you like a Safe or Risky budget?\nA riskier budget will allow you to spend more but you will have less leftover for a rainy day. \nWhereas a safer budget will afford you less big expenses, but greater peace of mind.\n'
+            ))
         if re.search('(S|s)afe', choice):
             print('safe')
-        elif re.search('(R|r)isky', 'choice'):
+        elif re.search('(R|r)isky', choice):
             print('risky')
         else:
             print('fail')
