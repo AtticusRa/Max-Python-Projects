@@ -1,3 +1,4 @@
+#%%
 class Test():
     sampleDict = {'1': True}
 
