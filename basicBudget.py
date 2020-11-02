@@ -13,6 +13,7 @@ Graphical output to better visualize the budget breakdown https://docs.google.co
 Organize expenses by category so they can fill into csv by category
 
 Add valueError testing to user inputs for spending and income
+Compare theoretical ideal spending to current actual spending to improve budget
 
 1. Housing (25-35%)
 2. Transportation (10-15)
@@ -29,7 +30,8 @@ Add valueError testing to user inputs for spending and income
 
 """
 
-import re, openpyxl
+import re, os
+from openpyxl import Workbook, formula
 
 
 def main():
@@ -38,9 +40,9 @@ def main():
     monthlyExpense = int(input('How much are you spending every month? '))
     newBudget = budget(monthlyIncome, monthlyExpense, name)
     print(f'Hello {newBudget.name}')
-    newBudget.incomeSources()
-    newBudget.expenseSources()
-    newBudget.displayBudget()
+    #newBudget.incomeSources()
+    #newBudget.expenseSources()
+    newBudget.createSheet()
 
 
 class budget():
@@ -63,22 +65,26 @@ class budget():
         self.monthly['Monthly Income'] = monthlyIncome
         self.monthly['Monthly Expense'] = monthlyExpense
         self.name = name
+        self.wb = Workbook()
 
+    #Populate the incomeInput list with user responses, converting all responses to floats. Non used categories use value 0.
     def incomeSources(self):
         print(
             'Please enter the average amount your household earns from each item.\n'
         )
         for source in self.incomeCategories:
-            self.incomeInput.append(int(input(source + ': ')))
+            self.incomeInput.append(float(input(source + ': ')))
 
+    #Populate the expenseInput list with user responses, converting all responses to floats. Non used categories use value 0.
     def expenseSources(self):
         print(
             'Please enter the average amount your household spends on each item every month. If you don\'t use this item, enter 0.\n'
         )
         for source in self.expenseCategories:
-            self.expenseInput.append(int(input(source + ': ')))
+            self.expenseInput.append(float(input(source + ': ')))
         pass
 
+    #Output the budget information to the user and the terminal. Replace with better visual output.
     def displayBudget(self):
         res = '\n'.join(
             '{} {}'.format(x, y)
@@ -89,6 +95,24 @@ class budget():
         print(f'Hello again, {self.name}, your income sources are: \n\n' + res)
         print('\n')
         print(f'Finally, {self.name}, your expenses are:\n\n' + res2)
+
+    #Creates the workbook sheet that we will use to make the final CSV product.
+    def createSheet(self):
+        print('Creating Workbook from entered information... ')
+        ws = self.wb.active
+        ws.title = f"{self.name}\'s Budget"
+        for row, entry in enumerate(self.expenseCategories, 1):
+            ws.cell(row=row, column=1, value=entry)
+        for row, entry in enumerate(self.incomeCategories, 1):
+            ws.cell(row=row, column=2, value=entry)
+
+        self.wb.save('sampleBudget.xlsx')
+        print('Workbook created at ' + str(os.getcwd()))
+        pass
+
+    #Takes pre set budget % skews and compares them against the actual % skews from the budget.
+    def analyzeBudget(self):
+        pass
 
 
 if __name__ == '__main__':
