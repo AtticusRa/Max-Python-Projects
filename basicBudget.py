@@ -40,8 +40,9 @@ def main():
     monthlyExpense = int(input('How much are you spending every month? '))
     newBudget = budget(monthlyIncome, monthlyExpense, name)
     print(f'Hello {newBudget.name}')
-    #newBudget.incomeSources()
-    #newBudget.expenseSources()
+    newBudget.incomeSources()
+    newBudget.expenseSources()
+    newBudget.analyzeBudget()
     newBudget.createSheet()
 
 
@@ -70,10 +71,12 @@ class budget():
     #Populate the incomeInput list with user responses, converting all responses to floats. Non used categories use value 0.
     def incomeSources(self):
         print(
-            'Please enter the average amount your household earns from each item.\n'
+            'Please enter the average amount your household earns from each item every month.\n'
         )
         for source in self.incomeCategories:
             self.incomeInput.append(float(input(source + ': ')))
+        print('Your current monthly reported income is: ' +
+              str(sum(self.incomeInput)))
 
     #Populate the expenseInput list with user responses, converting all responses to floats. Non used categories use value 0.
     def expenseSources(self):
@@ -82,7 +85,14 @@ class budget():
         )
         for source in self.expenseCategories:
             self.expenseInput.append(float(input(source + ': ')))
-        pass
+        print('Your current reported monthly expenses are: ' +
+              str(sum(self.expenseInput)))
+        if sum(self.incomeInput) > sum(self.expenseInput):
+            print('Great, you are making more than you are spending.')
+        else:
+            print(
+                'You are in the red, but that\'s okay. Let\'s make a great new budget to help out.'
+            )
 
     #Output the budget information to the user and the terminal. Replace with better visual output.
     def displayBudget(self):
@@ -102,13 +112,16 @@ class budget():
         ws = self.wb.active
         ws.title = f"{self.name}\'s Budget"
         for row, entry in enumerate(self.expenseCategories, 1):
-            ws.cell(row=row, column=1, value=entry)
+            ws.cell(row=row, column=3, value=entry)
         for row, entry in enumerate(self.incomeCategories, 1):
+            ws.cell(row=row, column=1, value=entry)
+        for row, entry in enumerate(self.incomeInput, 1):
             ws.cell(row=row, column=2, value=entry)
+        for row, entry in enumerate(self.expenseInput, 1):
+            ws.cell(row=row, column=4, value=entry)
 
-        self.wb.save('sampleBudget.xlsx')
+        self.wb.save(f'{self.name}\'s Budget.xlsx')
         print('Workbook created at ' + str(os.getcwd()))
-        pass
 
     #Takes pre set budget % skews and compares them against the actual % skews from the budget.
     def analyzeBudget(self):
