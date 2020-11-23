@@ -36,10 +36,8 @@ from openpyxl import Workbook, formula
 
 def main():
     name = input('Hi, what is your name? ')
-    monthlyIncome = int(input('How much is your monthly income? '))
-    monthlyExpense = int(input('How much are you spending every month? '))
-    newBudget = budget(monthlyIncome, monthlyExpense, name)
-    print(f'Hello {newBudget.name}')
+    newBudget = budget(0, 0, name)
+    print(f'Hello, {newBudget.name}.')
     newBudget.incomeSources()
     newBudget.expenseSources()
     newBudget.analyzeBudget()
@@ -48,7 +46,8 @@ def main():
 
 class budget():
     def __init__(self, monthlyIncome, monthlyExpense, name):
-        self.monthly = {}
+        self.monthlyIncome = monthlyIncome
+        self.monthlyExpense = monthlyExpense
         self.incomeInput = []
         self.expenseInput = []
         self.incomeCategories = [
@@ -63,31 +62,38 @@ class budget():
             'Electronics/Virtual Products', 'Education Expenses', 'Phone',
             'Fees & Charges', 'Travel'
         ]
-        self.monthly['Monthly Income'] = monthlyIncome
-        self.monthly['Monthly Expense'] = monthlyExpense
         self.name = name
         self.wb = Workbook()
 
-    #Populate the incomeInput list with user responses, converting all responses to floats. Non used categories use value 0.
+    """
+    Populate the incomeInput list with user responses, converting all responses to floats. Non used categories use value 0.
+     
+    
+    """
+
     def incomeSources(self):
         print(
             'Please enter the average amount your household earns from each item every month.\n'
         )
+        self.incomeCategories.sort()
         for source in self.incomeCategories:
             self.incomeInput.append(float(input(source + ': ')))
+        self.monthlyIncome = sum(self.incomeInput)
         print('Your current monthly reported income is: ' +
-              str(sum(self.incomeInput)))
+              str(self.monthlyIncome))
 
     #Populate the expenseInput list with user responses, converting all responses to floats. Non used categories use value 0.
     def expenseSources(self):
         print(
             'Please enter the average amount your household spends on each item every month. If you don\'t use this item, enter 0.\n'
         )
+        self.expenseCategories.sort()
         for source in self.expenseCategories:
             self.expenseInput.append(float(input(source + ': ')))
+        self.monthlyExpense = sum(self.expenseInput)
         print('Your current reported monthly expenses are: ' +
-              str(sum(self.expenseInput)))
-        if sum(self.incomeInput) > sum(self.expenseInput):
+              str(self.monthlyExpense))
+        if self.monthlyIncome > self.monthlyExpense:
             print('Great, you are making more than you are spending.')
         else:
             print(
@@ -108,7 +114,7 @@ class budget():
 
     #Creates the workbook sheet that we will use to make the final CSV product.
     def createSheet(self):
-        print('Creating Workbook from entered information... ')
+        print('Creating Spreadsheet from entered information... ')
         ws = self.wb.active
         ws.title = f"{self.name}\'s Budget"
         for row, entry in enumerate(self.expenseCategories, 1):
@@ -119,6 +125,13 @@ class budget():
             ws.cell(row=row, column=2, value=entry)
         for row, entry in enumerate(self.expenseInput, 1):
             ws.cell(row=row, column=4, value=entry)
+
+        ws['F6'] = 'Monthly Income:'
+        ws['F7'] = 'Monthly Expense:'
+        ws['G6'] = self.monthlyIncome
+        ws['G7'] = self.monthlyExpense
+        ws['G8'] = 'Net:'
+        ws['H8'] = self.monthlyIncome - self.monthlyExpense
 
         self.wb.save(f'{self.name}\'s Budget.xlsx')
         print('Workbook created at ' + str(os.getcwd()))
